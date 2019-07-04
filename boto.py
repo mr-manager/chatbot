@@ -4,6 +4,16 @@ This is the template server side for ChatBot
 from bottle import route, run, template, static_file, request
 import json
 
+swear_jar = ['fuck', 'shit', 'cunt']
+
+# def check_input(input):
+#     return input
+
+
+def check_for_swears(input):
+    if any(word in input for word in swear_jar):
+        return True
+
 
 @route('/', method='GET')
 def index():
@@ -13,6 +23,9 @@ def index():
 @route("/chat", method='POST')
 def chat():
     user_message = request.POST.get('msg')
+    split_user_message = user_message.split()
+    if check_for_swears(split_user_message):
+        return json.dumps({"animation": "afraid", "msg": "place a nickle in the swear jar, young man"})
     return json.dumps({"animation": "inlove", "msg": user_message})
 
 
