@@ -1,19 +1,9 @@
 """
 This is the template server side for ChatBot
 """
-from bottle import route, run, template, static_file, request
+from bottle import route, run, template, static_file, request, response
 import json
-
-swear_jar = ['fuck', 'shit', 'cunt']
-
-# def check_input(input):
-#     return input
-
-
-def check_for_swears(input):
-    if any(word in input for word in swear_jar):
-        return True
-
+import user_reply_utils
 
 @route('/', method='GET')
 def index():
@@ -23,10 +13,12 @@ def index():
 @route("/chat", method='POST')
 def chat():
     user_message = request.POST.get('msg')
-    split_user_message = user_message.split()
-    if check_for_swears(split_user_message):
-        return json.dumps({"animation": "afraid", "msg": "place a nickle in the swear jar, young man"})
-    return json.dumps({"animation": "inlove", "msg": user_message})
+    if request.get_cookie("question"):
+        boto_reply = user_reply_utils.handel_user_input(user_message)
+        return boto_reply
+    else:
+        response.set_cookie("question", "yes")
+        return json.dumps({"animation": "excited", "msg": "Hi {0}, nice to meet you!".format(user_message)})
 
 
 @route("/test", method='POST')
